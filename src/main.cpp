@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
     ResultPath ch_rp = ch_query(vars.g, vars.ch_g, vars.adj, vars.adj_r, vars.map, vars.g->nodes[src_index].id, vars.g->nodes[dst_index].id);
     utils_print_results(&ch_rp);
 
-    std::cout << vars.adj[0][0].dst_index << std::endl;
-
+    std::cout << "Program Terminating" << std::endl;
     return 0;
 }

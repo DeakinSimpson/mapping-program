@@ -95,13 +95,13 @@ LoadedVariables utils_load_variables(const char *bin_path)
     clock_t t_stage = clock();
 
     vars.g = graph_load(bin_path);
-    printf("graph_load:           %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
+    std::cout << "graph_load:           " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl;
 
     t_stage = clock();
     for (long long i = 0; i < (long long)vars.g->nodes.size(); i++) {
         vars.map[vars.g->nodes[i].id] = i;
     }
-    printf("hashmap_create:       %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
+    std::cout << "hashmap_create:       " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl;
 
     char cache_path[512];
     utils_cache_path(cache_path, sizeof(cache_path), bin_path);
@@ -110,7 +110,7 @@ LoadedVariables utils_load_variables(const char *bin_path)
 
     t_stage = clock();
     vars.ch_g = ch_load(cache_path, vars.g, vars.adj, vars.adj_r);
-    printf("ch_load:              %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
+    std::cout << "ch_load:              " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl;
 
     if (vars.ch_g) {
         vars.loaded_from_cache = 1;
@@ -118,20 +118,19 @@ LoadedVariables utils_load_variables(const char *bin_path)
         t_stage = clock();
         vars.adj   = adjlist_create(vars.g, vars.map, 0);
         vars.adj_r = adjlist_create(vars.g, vars.map, 1);
-        printf("adjlist_create x2:    %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
+        std::cout << "adjlist_create x2:    " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl << std::endl;
 
         vars.ch_g = ch_build(vars.g, vars.adj, vars.adj_r);   // prints its own internal timing already
 
         t_stage = clock();
         ch_save(cache_path, vars.g, vars.adj, vars.adj_r, vars.ch_g);
-        printf("ch_save:              %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
+        std::cout << "ch_save:              " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl << std::endl;
     }
 
     t_stage = clock();
     vars.tree = rtree_build(vars.g);
-    printf("rtree_build:          %fs\n", (double)(clock() - t_stage) / CLOCKS_PER_SEC);
-
-    printf("Number of nodes: %lld, edges %lld\n", vars.g->node_count, vars.g->edge_count);
+    std::cout << "rtree_build:          " << (double)(clock() - t_stage) / CLOCKS_PER_SEC << "s" << std::endl << std::endl;
+    std::cout << "Number of nodes: " << vars.g->node_count << ", edges " << vars.g->edge_count << std::endl << std::endl;
 
     return vars;
 }

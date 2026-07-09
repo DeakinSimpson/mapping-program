@@ -225,9 +225,7 @@ CHGraph *ch_build(Graph *g, std::vector<AdjList> &adj, std::vector<AdjList> &adj
 /*
 Query a contraction hierarchy
 */
-ResultPath ch_query(Graph *g, CHGraph *ch_g, std::vector<AdjList> &adj, std::vector<AdjList> &adj_r,
-    std::unordered_map<long long, long long> &map, long long src_id, long long dst_id)
-{
+ResultPath ch_query(Graph *g, CHGraph *ch_g, std::vector<AdjList> &adj, std::vector<AdjList> &adj_r, std::unordered_map<long long, long long> &map, long long src_id, long long dst_id) {
     clock_t t = clock();
     ResultPath result;
 
