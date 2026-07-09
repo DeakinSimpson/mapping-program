@@ -39,7 +39,7 @@ Graph *graph_load(const char* path) {
     return g;
 }
 
-std::vector<AdjList> adjlist_create(Graph *g, std::unordered_map<long long, long long> &map, bool reverse) {
+std::vector<AdjList> adjlist_create(Graph *g, std::unordered_map<long long, long long> &map, int reverse) {
     // allocate an adjacency list per node
     std::vector<AdjList> adj(g->nodes.size());
 

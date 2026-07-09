@@ -1,5 +1,6 @@
 #include <iostream>
 #include <graph.h>
+#include "utils.h"
 /*
 This is the C++ rewrite of the map-pathfinding project,
 this is because i was able to complete the pathfinding
@@ -12,15 +13,24 @@ project will be a lot smaller
 
 // int main(int argc, char* argv[])
 int main(int argc, char* argv[]) {
-    if (argc != 0) {
-        std::cout << argc << std::endl;
+    if (argc != 7  && argc != 5) {
+        std::cout << "usage: ./builder/pathfinder.exe <path_to_bin> -c <src lat> <src lon> <dst lat> <dst lon>" << std::endl;
+        std::cout << "usage: ./builder/pathfinder.exe <path_to_bin> -d <src place> <dst place>" << std::endl;
+        return 1;
     }
 
-    std::cout << "hello world" << std::endl;
+    // load in all variables
+    LoadedVariables vars = utils_load_variables(argv[1]);
 
-    Graph *g = graph_load(argv[1]);
+    long long src_index;
+    long long dst_index;
 
-    std::cout << "Nodes Loaded: " << g->node_count << std::endl;
+    utils_get_index(&src_index, &dst_index, argv, vars.tree, vars.g, vars.adj);
+
+    ResultPath ch_rp = ch_query(vars.g, vars.ch_g, vars.adj, vars.adj_r, vars.map, vars.g->nodes[src_index].id, vars.g->nodes[dst_index].id);
+    utils_print_results(&ch_rp);
+
+    std::cout << vars.adj[0][0].dst_index << std::endl;
 
     return 0;
 }
