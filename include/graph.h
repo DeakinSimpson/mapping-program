@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 // an enum storing all the roadtypes possible for osm
 enum RoadType {
@@ -58,6 +59,17 @@ struct ResultPath {
     double                  load_time_in_seconds;
 };
 
+struct AdjEdge {
+    long long   dst_index;
+    double      weight;
+    double      km_weight;
+    int         speed_limit;
+    RoadType    road_type;    
+};
+
+using AdjList = std::vector<AdjEdge>;
+
 // define functions for graph_c
 Graph* graph_load(const char* path);
-// void result_path_free(ResultPath *rp);
+std::vector<AdjList> adjlist_create(Graph *g, std::unordered_map<long long, long long> &map, int reverse);
+void adjlist_add_edge(std::vector<AdjList> &adj, long long src, long long dst, double weight, double km_weight, int speed_limit, RoadType road_type);
