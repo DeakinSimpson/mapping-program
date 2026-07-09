@@ -53,5 +53,4 @@ struct RTree {
 };
 
 RTree* rtree_build(Graph *g);
-double mbr_min_dist_sq(Coordinate coord, MinimumBoundingRectangle *mbr);
 long long rtree_nearest(RTree *tree, Coordinate coord, Graph *g, std::vector<AdjList> &adj);
