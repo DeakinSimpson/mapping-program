@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "KHR/khrplatform.h"
 
+// this converts the worlds x and y positions to the screens x and y positions
 WindowCoordinate world_to_screen(WindowCoordinate world_pos, Camera cam, int window_width, int window_height) {
     // where is the camera centred
     WindowCoordinate camera_world_pos = convert_to_coordinate(cam.centre_lat, cam.centre_lon, cam.zoom);
@@ -48,6 +49,7 @@ WindowCoordinate screen_to_ndc(WindowCoordinate screen_pos, int window_width, in
     return ndc_coord;
 }
 
+// conveerts lat and lon variables to ndc points
 WindowCoordinate latlon_to_ndc(double lat, double lon, Camera cam, int window_width, int window_height) {
     WindowCoordinate world_pos;
     WindowCoordinate screen_pos;
@@ -58,4 +60,14 @@ WindowCoordinate latlon_to_ndc(double lat, double lon, Camera cam, int window_wi
     ndc_pos = screen_to_ndc(screen_pos, window_width, window_height);
 
     return ndc_pos;
+}
+
+// initialises camera
+Camera camera_init_null() {
+    Camera cam;
+    cam.centre_lat = 0.0;
+    cam.centre_lon = 0.0;
+    cam.zoom = 0.0;
+
+    return cam;
 }

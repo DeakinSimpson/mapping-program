@@ -21,6 +21,11 @@ project will be a lot smaller
 // int argc, char* argv[]
 int main()
 {
+    // ----- Pathfinding section -----
+    
+
+
+    // ----- OPENGL rendering section -----
     GLFWwindow *window = initialiseVariables(800, 600);
     if (!window) return -1;
 
@@ -31,21 +36,13 @@ int main()
 
     double test_lat = 45.44594600337907;
     double test_lon = 12.322594004786044;
-    
+
     // define camera starting pos (venice)
-    Camera cam;
-    cam.centre_lat = 45.44594600337907;
-    cam.centre_lon = 45.312594004716040;
-    cam.zoom = 3;
+    Camera cam = camera_init_null();
 
     // set camera
     set_camera(&cam);
 
-    // set callback functions, this is used for input checking
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetCursorPosCallback(window, cursor_pos_callback);
-    
     // render loop
     while (!glfwWindowShouldClose(window)) {
         // input
