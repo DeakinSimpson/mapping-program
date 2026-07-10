@@ -37,6 +37,14 @@ int main()
     cam.centre_lat = 45.44594600337907;
     cam.centre_lon = 45.312594004716040;
     cam.zoom = 3;
+
+    // set camera
+    set_camera(&cam);
+
+    // set callback functions, this is used for input checking
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
     
     // render loop
     while (!glfwWindowShouldClose(window)) {
