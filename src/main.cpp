@@ -7,6 +7,7 @@
 #include "window.h"
 #include "shader.h"
 #include "renderer.h"
+#include "camera.h"
 /*
 This is the C++ rewrite of the map-pathfinding project,
 this is because i was able to complete the pathfinding
@@ -28,6 +29,14 @@ int main()
     unsigned int fragmentShader = compile_fragment_shader();
     unsigned int shaderProgram = create_shader_program(vertexShader, fragmentShader);
 
+    double test_lat = 45.44594600337907;
+    double test_lon = 12.322594004786044;
+    
+    // define camera starting pos (venice)
+    Camera cam;
+    cam.centre_lat = 45.44594600337907;
+    cam.centre_lon = 45.312594004716040;
+    cam.zoom = 3;
     
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -36,13 +45,19 @@ int main()
 
         // rendering commands will go here...
         
+        // add resizing, this needs to be done for the coordinate system
+        int window_width;
+        int window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+
         // set background colour
         glClearColor(0.1f, 0.4f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // render verticies
         glUseProgram(shaderProgram);
-        draw_square(0.5, 0.5, 0.5);
+        WindowCoordinate ndc = latlon_to_ndc(test_lat, test_lon, cam, window_width, window_height);
+        draw_square(ndc.x, ndc.y, 0.1, (float)window_width / window_height);
 
         // check call events and swap buffers
         glfwPollEvents();

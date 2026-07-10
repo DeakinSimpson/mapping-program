@@ -4,13 +4,13 @@
 #include "GLFW/glfw3.h"
 #include "KHR/khrplatform.h"
 
-void draw_square(float x, float y, float size) {
+void draw_square(float x, float y, float size, float aspect) {
     // define squares verticies
     float verticies[] = {
-        x + size, y + size, 0.0f,  // top right    (0)
-        x + size, y - size, 0.0f,  // bottom right  (1)
-        x - size, y - size, 0.0f,  // bottom left   (2)
-        x - size, y + size, 0.0f   // top left      (3)
+        x + size / aspect, y + size, 0.0f,  // top right    (0)
+        x + size / aspect, y - size, 0.0f,  // bottom right  (1)
+        x - size / aspect, y - size, 0.0f,  // bottom left   (2)
+        x - size / aspect, y + size, 0.0f   // top left      (3)
     };
 
     // defines where to draw the lines, GPU's can only draw triangles
