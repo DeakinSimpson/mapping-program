@@ -5,13 +5,10 @@
 #include "KHR/khrplatform.h"
 
 // this converts the worlds x and y positions to the screens x and y positions
-WindowCoordinate world_to_screen(WindowCoordinate world_pos, Camera cam, int window_width, int window_height) {
-    // where is the camera centred
-    WindowCoordinate camera_world_pos = convert_to_coordinate(cam.centre_lat, cam.centre_lon, cam.zoom);
-
+WindowCoordinate world_to_screen(WindowCoordinate world_pos, WindowCoordinate cam_world_pos, int window_width, int window_height) {
     // how far is the pixel from the centre of the camera
-    double offset_x = world_pos.x - camera_world_pos.x;
-    double offset_y = world_pos.y - camera_world_pos.y;
+    double offset_x = world_pos.x - cam_world_pos.x;
+    double offset_y = world_pos.y - cam_world_pos.y;
 
     // where does the pixel land on the window
     double screen_x = offset_x + (window_width / 2);
@@ -51,12 +48,14 @@ WindowCoordinate screen_to_ndc(WindowCoordinate screen_pos, int window_width, in
 
 // conveerts lat and lon variables to ndc points
 WindowCoordinate latlon_to_ndc(double lat, double lon, Camera cam, int window_width, int window_height) {
+    WindowCoordinate camera_world_pos;
     WindowCoordinate world_pos;
     WindowCoordinate screen_pos;
     WindowCoordinate ndc_pos;
 
+    camera_world_pos = convert_to_coordinate(cam.centre_lat, cam.centre_lon, cam.zoom);
     world_pos = convert_to_coordinate(lat, lon, cam.zoom);
-    screen_pos = world_to_screen(world_pos, cam, window_width, window_height);
+    screen_pos = world_to_screen(world_pos, camera_world_pos, window_width, window_height);
     ndc_pos = screen_to_ndc(screen_pos, window_width, window_height);
 
     return ndc_pos;

@@ -7,6 +7,16 @@
 #include "projection.h"
 #include "camera.h"
 
+struct RenderEdge {
+    float x1;
+    float y1;
+    float z1;
+
+    float x2;
+    float y2;
+    float z2;
+};
+
 static unsigned int VAO; // holds setup info (including VBO & EBO)
 static unsigned int VBO; // holds vertex positions
 static unsigned int EBO; // holds indicies
@@ -41,6 +51,8 @@ void free_rendering_variables() {
     glDeleteBuffers(1, &EBO);
 }
 
+
+//! DEPROVISIONED FOR NOW
 void draw_square(float x, float y, float size, float aspect) {
     // define squares verticies
     float verticies[] = {
@@ -81,6 +93,7 @@ void draw_square(float x, float y, float size, float aspect) {
     glBindVertexArray(0);
 }
 
+//! DEPROVISIONED FOR NOW
 void draw_line(float x1, float y1, float x2, float y2) {
     // a line only has 2 verticies
     float verticies[] = {
@@ -104,17 +117,34 @@ void draw_line(float x1, float y1, float x2, float y2) {
     glBindVertexArray(0);
 }
 
-void draw_path(LoadedVariables vars, ResultPath rp, Camera cam, int window_width, int window_height) {
-    float aspect = (float)window_width / window_height;
 
-    for (long long i = 0; i < (long long)rp.path_inx.size(); i++) {
-        WindowCoordinate i_ndc = latlon_to_ndc(vars.g->nodes[rp.path_inx[i]].lat, vars.g->nodes[rp.path_inx[i]].lon, cam, window_width, window_height);
-        draw_square(i_ndc.x, i_ndc.y, 0.01, aspect);
+void draw_path(const LoadedVariables &vars, const ResultPath &rp, Camera cam, int window_width, int window_height) {
+    std::vector<RenderEdge> edges;
+    WindowCoordinate camera_world_pos = convert_to_coordinate(cam.centre_lat, cam.centre_lon, cam.zoom);
+
+    // append all edges to the edges vector
+    for (long long i = 0; i < (long long)rp.path_inx.size() - 1; i++) {
+        WindowCoordinate world_a = convert_to_coordinate(vars.g->nodes[rp.path_inx[i]].lat, vars.g->nodes[rp.path_inx[i]].lon, cam.zoom);
+        WindowCoordinate world_b = convert_to_coordinate(vars.g->nodes[rp.path_inx[i + 1]].lat, vars.g->nodes[rp.path_inx[i + 1]].lon, cam.zoom);
+
+        WindowCoordinate screen_a = world_to_screen(world_a, camera_world_pos, window_width, window_height);
+        WindowCoordinate screen_b = world_to_screen(world_b, camera_world_pos, window_width, window_height);
+
+        WindowCoordinate i_ndc   = screen_to_ndc(screen_a, window_width, window_height);
+        WindowCoordinate i_ndc_1 = screen_to_ndc(screen_b, window_width, window_height);
+
+        RenderEdge edge;
+        edge.x1 = i_ndc.x;   edge.y1 = i_ndc.y;   edge.z1 = 0.0f;
+        edge.x2 = i_ndc_1.x; edge.y2 = i_ndc_1.y; edge.z2 = 0.0f;
+        edges.push_back(edge);
     }
 
-    for (long long i = 0; i < (long long)rp.path_inx.size() - 1; i++) {
-        WindowCoordinate i_ndc = latlon_to_ndc(vars.g->nodes[rp.path_inx[i]].lat, vars.g->nodes[rp.path_inx[i]].lon, cam, window_width, window_height);
-        WindowCoordinate i_ndc_1 = latlon_to_ndc(vars.g->nodes[rp.path_inx[i + 1]].lat, vars.g->nodes[rp.path_inx[i + 1]].lon, cam, window_width, window_height);
-        draw_line(i_ndc.x, i_ndc.y, i_ndc_1.x, i_ndc_1.y);
-    }    
+    // send the edges data straight to the gpu same as float[]
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, edges.size() * sizeof(RenderEdge), edges.data(), GL_DYNAMIC_DRAW);
+
+    // verticies array is edges array * 2 as there are twice as many verticies as edges
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_LINES, 0, edges.size() * 2);
+    glBindVertexArray(0);    
 }

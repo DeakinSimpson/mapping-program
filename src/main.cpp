@@ -56,6 +56,9 @@ int main(int argc, char* argv[])
     // set camera
     set_camera(&cam);
 
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "Version: "  << glGetString(GL_VERSION)  << std::endl;
+
     // render loop
     while (!glfwWindowShouldClose(window)) {
         // input
