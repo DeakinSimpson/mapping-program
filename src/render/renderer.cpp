@@ -120,18 +120,11 @@ void draw_line(float x1, float y1, float x2, float y2) {
 
 void draw_path(const LoadedVariables &vars, const ResultPath &rp, Camera cam, int window_width, int window_height) {
     std::vector<RenderEdge> edges;
-    WindowCoordinate camera_world_pos = convert_to_coordinate(cam.centre_lat, cam.centre_lon, cam.zoom);
 
     // append all edges to the edges vector
     for (long long i = 0; i < (long long)rp.path_inx.size() - 1; i++) {
-        WindowCoordinate world_a = convert_to_coordinate(vars.g->nodes[rp.path_inx[i]].lat, vars.g->nodes[rp.path_inx[i]].lon, cam.zoom);
-        WindowCoordinate world_b = convert_to_coordinate(vars.g->nodes[rp.path_inx[i + 1]].lat, vars.g->nodes[rp.path_inx[i + 1]].lon, cam.zoom);
-
-        WindowCoordinate screen_a = world_to_screen(world_a, camera_world_pos, window_width, window_height);
-        WindowCoordinate screen_b = world_to_screen(world_b, camera_world_pos, window_width, window_height);
-
-        WindowCoordinate i_ndc   = screen_to_ndc(screen_a, window_width, window_height);
-        WindowCoordinate i_ndc_1 = screen_to_ndc(screen_b, window_width, window_height);
+        WindowCoordinate i_ndc = latlon_to_ndc(vars.g->nodes[rp.path_inx[i]].lat, vars.g->nodes[rp.path_inx[i]].lon, cam, window_width, window_height);
+        WindowCoordinate i_ndc_1 = latlon_to_ndc(vars.g->nodes[rp.path_inx[i + 1]].lat, vars.g->nodes[rp.path_inx[i + 1]].lon, cam, window_width, window_height);
 
         RenderEdge edge;
         edge.x1 = i_ndc.x;   edge.y1 = i_ndc.y;   edge.z1 = 0.0f;
