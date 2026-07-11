@@ -5,6 +5,7 @@
 #include "KHR/khrplatform.h"
 #include "iostream"
 #include "math.h"
+#include "renderer.h"
 
 // set max and min lat values to stop values going to infinity at the edges
 static const double lat_lim = 85.0511;
@@ -51,6 +52,8 @@ GLFWwindow *initialiseVariables(int initial_width, int initial_height) {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
+
+    initialise_rendering_variables();
 
     return window;
 }
