@@ -21,6 +21,10 @@ static unsigned int VAO; // holds setup info (including VBO & EBO)
 static unsigned int VBO; // holds vertex positions
 static unsigned int EBO; // holds indicies
 
+// world map variables
+static unsigned int model_VAO, model_VBO, model_EBO;
+static int model_index_count = 0;
+
 void initialise_rendering_variables() {
     // generate 1 ID and store it in the position &name 
     glGenVertexArrays(1, &VAO);
@@ -141,3 +145,37 @@ void draw_path(const LoadedVariables &vars, const ResultPath &rp, Camera cam, in
     glDrawArrays(GL_LINES, 0, edges.size() * 2);
     glBindVertexArray(0);    
 }
+
+// upload the model to the gpu
+void upload_model(const TriangulatedModel &model) {
+    glGenVertexArrays(1, &model_VAO);
+    glGenBuffers(1, &model_VBO);
+    glGenBuffers(1, &model_EBO);
+
+    glBindVertexArray(model_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, model_VBO);
+    glBufferData(GL_ARRAY_BUFFER, model.verticies.size() * sizeof(Vertex), model.verticies.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indicies.size() * sizeof(uint32_t), model.indicies.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    model_index_count = (int)model.indicies.size();
+}
+
+// use the stored information in the gpu to render the map
+void draw_model(unsigned int shaderProgram, Camera cam, int window_width, int window_height) {
+    glUseProgram(shaderProgram);
+    glUniform1f(glGetUniformLocation(shaderProgram, "u_cam_lat"), (float)cam.centre_lat);
+    glUniform1f(glGetUniformLocation(shaderProgram, "u_cam_lon"), (float)cam.centre_lon);
+    glUniform1f(glGetUniformLocation(shaderProgram, "u_zoom"),    (float)cam.zoom);
+    glUniform1f(glGetUniformLocation(shaderProgram, "u_width"),   (float)window_width);
+    glUniform1f(glGetUniformLocation(shaderProgram, "u_height"),  (float)window_height);
+
+    glBindVertexArray(model_VAO);
+    glDrawElements(GL_TRIANGLES, model_index_count, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+

@@ -8,6 +8,7 @@
 #include "shader.h"
 #include "renderer.h"
 #include "camera.h"
+#include "modelImporter.h"
 /*
 This is the C++ rewrite of the map-pathfinding project,
 this is because i was able to complete the pathfinding
@@ -50,7 +51,7 @@ int main(int argc, char* argv[])
     double test_lat = 0;
     double test_lon = 0;
 
-    // define camera starting pos (venice)
+    // define camera starting pos (null island)
     Camera cam = camera_init_null();
 
     // set camera
@@ -58,6 +59,20 @@ int main(int argc, char* argv[])
 
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "Version: "  << glGetString(GL_VERSION)  << std::endl;
+
+    // loading world map values
+    std::cout << "Starting to load in world map..." << std::endl;
+    const char *map_path = "data/polygons/land_polygons.shp";
+    Model raw_model = load_land_polygons(map_path);
+    TriangulatedModel triangulated_model = triangulate_model(raw_model);
+    std::cout << "world map loaded." << std::endl;
+
+    // add shader for the map 
+    unsigned int mapVertexShader = compile_map_vertex_shader();
+    unsigned int mapShaderProgram = create_shader_program(mapVertexShader, compile_fragment_shader());
+
+    // upload the model to the gpu
+    upload_model(triangulated_model);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -75,6 +90,8 @@ int main(int argc, char* argv[])
         // set background colour
         glClearColor(0.1f, 0.4f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        draw_model(mapShaderProgram, cam, window_width, window_height);
 
         // render verticies
         glUseProgram(shaderProgram);

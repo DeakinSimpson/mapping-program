@@ -18,3 +18,6 @@ unsigned int compile_fragment_shader();
 This compiles the other shaders and sends them to the GPU to display
 */
 unsigned int create_shader_program(unsigned int vertex_shader, unsigned int fragment_shader);
+
+// perform mercader projection math on gpu instead of the cpu
+unsigned int compile_map_vertex_shader();
