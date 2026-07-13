@@ -22,8 +22,8 @@ static unsigned int VBO; // holds vertex positions
 static unsigned int EBO; // holds indicies
 
 // world map variables
-static unsigned int model_VAO, model_VBO, model_EBO;
-static int model_index_count = 0;
+static unsigned int world_map_VAO, world_map_VBO, world_map_EBO;
+static int world_map_index_count = 0;
 
 void initialise_rendering_variables() {
     // generate 1 ID and store it in the position &name 
@@ -53,74 +53,10 @@ void free_rendering_variables() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &world_map_VAO);
+    glDeleteBuffers(1, &world_map_VBO);
+    glDeleteBuffers(1, &world_map_EBO);
 }
-
-
-//! DEPROVISIONED FOR NOW
-void draw_square(float x, float y, float size, float aspect) {
-    // define squares verticies
-    float verticies[] = {
-        x + size / aspect, y + size, 0.0f,  // top right    (0)
-        x + size / aspect, y - size, 0.0f,  // bottom right  (1)
-        x - size / aspect, y - size, 0.0f,  // bottom left   (2)
-        x - size / aspect, y + size, 0.0f   // top left      (3)
-    };
-
-    // defines where to draw the lines, GPU's can only draw triangles
-    unsigned int indicies[] = {
-        0, 1, 3, // top right, bottom right, top left (triangle)
-        1, 2, 3  // bottom right, top left, bottom left (triangle)
-    };
-
-    glBindVertexArray(VAO); // bind VAO
-
-    // make VBO the active buffer, then bind verticies to the active buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
-    
-    // makes EBo the active element array buffer, then binds the indicies to it
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-    // unbinds the VBO by binding 0
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-    /*
-    GL_TRIANGLES — draw triangles
-    6 — draw 6 indices (2 triangles × 3 vertices each)
-    GL_UNSIGNED_INT — the indices are unsigned int
-    0 — start from the beginning of the EBO    
-    */
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    
-    // unbinds VAO by binding 0
-    glBindVertexArray(0);
-}
-
-//! DEPROVISIONED FOR NOW
-void draw_line(float x1, float y1, float x2, float y2) {
-    // a line only has 2 verticies
-    float verticies[] = {
-        x1, y1, 0.0f, // first verticy
-        x2, y2, 0.0f  // second verticy
-    };
-
-    glBindVertexArray(VAO); // bind VAO
-
-    // make VBO the active buffer, then bind verticies to the active buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
-
-    // unbinds the VBO by binding 0
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-    // draws a line between the two verticies
-    glDrawArrays(GL_LINES, 0, 2);
-
-    // unbinds VAO by binding 0
-    glBindVertexArray(0);
-}
-
 
 void draw_path(const LoadedVariables &vars, const ResultPath &rp, Camera cam, int window_width, int window_height) {
     std::vector<RenderEdge> edges;
@@ -148,24 +84,39 @@ void draw_path(const LoadedVariables &vars, const ResultPath &rp, Camera cam, in
 
 // upload the model to the gpu
 void upload_model(const TriangulatedModel &model) {
-    glGenVertexArrays(1, &model_VAO);
-    glGenBuffers(1, &model_VBO);
-    glGenBuffers(1, &model_EBO);
+    // set the current buffers to active
+    glGenVertexArrays(1, &world_map_VAO);
+    glGenBuffers(1, &world_map_VBO);
+    glGenBuffers(1, &world_map_EBO);
 
-    glBindVertexArray(model_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, model_VBO);
+    // bind VAO to buffer
+    glBindVertexArray(world_map_VAO);
+
+    // bind VBO to buffer
+    glBindBuffer(GL_ARRAY_BUFFER, world_map_VBO);
+
+    // set the current verticies to the VBO buffer
     glBufferData(GL_ARRAY_BUFFER, model.verticies.size() * sizeof(Vertex), model.verticies.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model_EBO);
+
+    // bind to the EBO buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, world_map_EBO);
+
+    // put indicies to the buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indicies.size() * sizeof(uint32_t), model.indicies.data(), GL_STATIC_DRAW);
+
+    // draw the shape
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    // clear buffers
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    model_index_count = (int)model.indicies.size();
+    world_map_index_count = (int)model.indicies.size();
 }
 
 // use the stored information in the gpu to render the map
 void draw_model(unsigned int shaderProgram, Camera cam, int window_width, int window_height) {
+    // set the variables in the gpu to the given variables
     glUseProgram(shaderProgram);
     glUniform1f(glGetUniformLocation(shaderProgram, "u_cam_lat"), (float)cam.centre_lat);
     glUniform1f(glGetUniformLocation(shaderProgram, "u_cam_lon"), (float)cam.centre_lon);
@@ -173,8 +124,9 @@ void draw_model(unsigned int shaderProgram, Camera cam, int window_width, int wi
     glUniform1f(glGetUniformLocation(shaderProgram, "u_width"),   (float)window_width);
     glUniform1f(glGetUniformLocation(shaderProgram, "u_height"),  (float)window_height);
 
-    glBindVertexArray(model_VAO);
-    glDrawElements(GL_TRIANGLES, model_index_count, GL_UNSIGNED_INT, 0);
+    // draw elements in world_map_VAO
+    glBindVertexArray(world_map_VAO);
+    glDrawElements(GL_TRIANGLES, world_map_index_count, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

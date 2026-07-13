@@ -62,8 +62,8 @@ int main(int argc, char* argv[])
 
     // loading world map values
     std::cout << "Starting to load in world map..." << std::endl;
-    const char *map_path = "data/polygons/land_polygons.shp";
-    Model raw_model = load_land_polygons(map_path);
+    const char *map_path = "data/polygons/simplified/simplified_land_polygons.shp";
+    Model raw_model = load_land_polygons(map_path, true);
     TriangulatedModel triangulated_model = triangulate_model(raw_model);
     std::cout << "world map loaded." << std::endl;
 
@@ -96,7 +96,6 @@ int main(int argc, char* argv[])
         // render verticies
         glUseProgram(shaderProgram);
         WindowCoordinate ndc = latlon_to_ndc(test_lat, test_lon, cam, window_width, window_height);
-        draw_square(ndc.x, ndc.y, 0.01, aspect);
 
         draw_path(vars, ch_rp, cam, window_width, window_height);
 

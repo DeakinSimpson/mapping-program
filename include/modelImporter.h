@@ -24,5 +24,5 @@ struct TriangulatedModel {
     std::vector<uint32_t> indicies;
 };
 
-Model load_land_polygons(const char *modelFilepath);
+Model load_land_polygons(const char *modelFilepath, bool mercator = false);
 TriangulatedModel triangulate_model(const Model &raw_polygons);
